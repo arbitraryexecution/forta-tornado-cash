@@ -10,7 +10,7 @@ This agent detects withdrawals from tornado.cash. It currently monitors the 0.1,
 
 ## Alerts
 
-- AE-FORTA-0
+- AE-TORNADO-WITHDRAW
   - Fired when an account withdraws any amount from tornado.cash
   - Severity is always set to "medium"
   - Type is always set to "suspicious"
