@@ -6,7 +6,7 @@ const {
   Finding,
   Network,
 } = require('forta-agent');
-const { handleTransaction } = require('./tornado-withdrawal');
+const { handleTransaction } = require('./agent');
 
 // Log data from a 10 ETH withdrawal from tornado.cash
 const logs = [
@@ -26,14 +26,26 @@ const logs = [
   },
 ];
 
-describe('tornado cash withdrawal', () => {
-  const createTxEvent = ({ addresses }) => {
-    const addrs = { ...addresses };
-    const tx = { hash: logs[0].transactionHash };
-    return new TransactionEvent(EventType.BLOCK, Network.MAINNET, tx, { logs }, [], addrs, null);
-  };
+const createTxEvent = ({ addresses }) => {
+  const addrs = { ...addresses };
+  const tx = { hash: logs[0].transactionHash };
+  return new TransactionEvent(EventType.BLOCK, Network.MAINNET, tx, { logs }, [], addrs, null);
+};
+
+describe('tornado.cash withdrawal', () => {
 
   describe('handleTransaction', () => {
+    it('returns no findings when no interaction with tornado.cash', async () => {
+      const address = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
+      const txEvent = createTxEvent(
+        { addresses : {[address]: true } },
+      );
+
+      const findings = await handleTransaction(txEvent);
+
+      expect(findings).toStrictEqual([]);
+    });
+
     it('flags tornado.cash withdrawals', async () => {
       const address = '0x910cbd523d972eb0a6f4cae4618ad62622b39dbf';
       const txEvent = createTxEvent(
@@ -53,6 +65,7 @@ describe('tornado cash withdrawal', () => {
           metadata: {
             to: '0x0d6df47d3ae23217daaf453b709e22dbd4b2c001',
             hash: logs[0].transactionHash,
+            amount: '10 ETH',
           },
           everestId: '0x55d07cab60a86966a01680e2242c4af4080a5566',
         }),
