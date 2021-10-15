@@ -16,11 +16,11 @@ const handleTransaction = async (txEvent) => {
   const abi = ['event Withdrawal(address to, bytes32 nullifierHash, address indexed relayer, uint256 fee)'];
   const iface = new ethers.utils.Interface(abi);
   const parsedLogs = txEvent.logs.map((log) => iface.parseLog(log));
-  const to = parsedLogs[0].args[0].toLowerCase();
 
-  if (txEvent.logs.length !== 0) {
-    // Withdrawal address is 0-padded at the beginning of the log data
-    // Manually decode it for the finding
+  if (parsedLogs.length !== 0) {
+
+    const to = parsedLogs[0].args[0].toLowerCase();
+    
     findings.push(
       Finding.fromObject({
         name: 'Tornado.cash withdrawal',
