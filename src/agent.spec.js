@@ -33,12 +33,11 @@ const createTxEvent = ({ addresses }) => {
 };
 
 describe('tornado.cash withdrawal', () => {
-
   describe('handleTransaction', () => {
     it('returns no findings when no interaction with tornado.cash', async () => {
       const address = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
       const txEvent = createTxEvent(
-        { addresses : {[address]: true } },
+        { addresses: { [address]: true } },
       );
 
       const findings = await handleTransaction(txEvent);

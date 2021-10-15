@@ -1,4 +1,5 @@
 const { Finding, FindingSeverity, FindingType } = require('forta-agent');
+const ethers = require('ethers');
 
 // Addresses of tornado.cash contracts that handle deposits and withdrawals
 // There are contract addresses for 0.1, 1, 10, and 100 ETH denominations
@@ -7,28 +8,28 @@ const TORNADO = require('./addresses.json');
 const handleTransaction = async (txEvent) => {
   const findings = [];
 
-  const withdrawSignature = 'Withdrawal(address,bytes32,address,uint256)';
-
   // Check each of the tornado.cash contracts
   const tornadoAddress = Object.keys(txEvent.addresses).find((address) => TORNADO[address]);
   if (!tornadoAddress) return findings;
 
-  const withdrawLog = txEvent.filterEvent(withdrawSignature, tornadoAddress);
-  console.log(withdrawLog);
+  // set up ABI so we can parse logs and decode events using ethers
+  const abi = ['event Withdrawal(address to, bytes32 nullifierHash, address indexed relayer, uint256 fee)'];
+  const iface = new ethers.utils.Interface(abi);
+  const parsedLogs = txEvent.logs.map((log) => iface.parseLog(log));
+  const to = parsedLogs[0].args[0].toLowerCase();
 
-  if (withdrawLog.length !== 0) {
+  if (txEvent.logs.length !== 0) {
     // Withdrawal address is 0-padded at the beginning of the log data
     // Manually decode it for the finding
-    const to = withdrawLog[0].data.slice(26, 66);
     findings.push(
       Finding.fromObject({
         name: 'Tornado.cash withdrawal',
-        description: `Withdrawal to 0x${to}`,
+        description: `Withdrawal to ${to}`,
         alertId: 'AE-TORNADO-WITHDRAW',
         severity: FindingSeverity.Medium,
         type: FindingType.Suspicious,
         metadata: {
-          to: `0x${to}`,
+          to: `${to}`,
           hash: txEvent.hash,
           amount: `${TORNADO[tornadoAddress]} ETH`,
         },
