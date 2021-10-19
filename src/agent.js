@@ -12,30 +12,33 @@ const handleTransaction = async (txEvent) => {
   const tornadoAddress = Object.keys(txEvent.addresses).find((address) => TORNADO[address]);
   if (!tornadoAddress) return findings;
 
-  // set up ABI so we can parse logs and decode events using ethers
+  // Set up ABI so we can parse logs and decode events using ethers
   const abi = ['event Withdrawal(address to, bytes32 nullifierHash, address indexed relayer, uint256 fee)'];
   const iface = new ethers.utils.Interface(abi);
   const parsedLogs = txEvent.logs.map((log) => iface.parseLog(log));
 
+  // If the tx contains events that match the abi, parsedLogs will have entries
   if (parsedLogs.length !== 0) {
+    // If called from a contract, there could be multiple withdrawal events in one tx
+    parsedLogs.forEach((log) => {
+      const to = log.args[0].toLowerCase();
 
-    const to = parsedLogs[0].args[0].toLowerCase();
-    
-    findings.push(
-      Finding.fromObject({
-        name: 'Tornado.cash withdrawal',
-        description: `Withdrawal to ${to}`,
-        alertId: 'AE-TORNADO-WITHDRAW',
-        severity: FindingSeverity.Medium,
-        type: FindingType.Suspicious,
-        metadata: {
-          to: `${to}`,
-          hash: txEvent.hash,
-          amount: `${TORNADO[tornadoAddress]} ETH`,
-        },
-        everestId: '0x55d07cab60a86966a01680e2242c4af4080a5566',
-      }),
-    );
+      findings.push(
+        Finding.fromObject({
+          name: 'Tornado.cash withdrawal',
+          description: `Withdrawal to ${to}`,
+          alertId: 'AE-TORNADO-WITHDRAW',
+          severity: FindingSeverity.Medium,
+          type: FindingType.Suspicious,
+          metadata: {
+            to: `${to}`,
+            hash: txEvent.hash,
+            amount: `${TORNADO[tornadoAddress]} ETH`,
+          },
+          everestId: '0x55d07cab60a86966a01680e2242c4af4080a5566',
+        }),
+      );
+    });
   }
   return findings;
 };
