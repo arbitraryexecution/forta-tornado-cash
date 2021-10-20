@@ -1,10 +1,8 @@
 const {
-  EventType,
   TransactionEvent,
   FindingType,
   FindingSeverity,
   Finding,
-  Network,
 } = require('forta-agent');
 const { handleTransaction } = require('./agent');
 
@@ -29,13 +27,13 @@ const logs = [
 const createTxEvent = ({ addresses }) => {
   const addrs = { ...addresses };
   const tx = { hash: logs[0].transactionHash };
-  return new TransactionEvent(EventType.BLOCK, Network.MAINNET, tx, { logs }, [], addrs, null);
+  return new TransactionEvent(null, null, tx, { logs }, [], addrs, null);
 };
 
 describe('tornado.cash withdrawal', () => {
   describe('handleTransaction', () => {
     it('returns no findings when no interaction with tornado.cash', async () => {
-      const address = '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9';
+      const address = '0xFAKEADDRESS';
       const txEvent = createTxEvent(
         { addresses: { [address]: true } },
       );
@@ -56,15 +54,14 @@ describe('tornado.cash withdrawal', () => {
       expect(findings).toStrictEqual([
         Finding.fromObject({
           name: 'Tornado.cash withdrawal',
-          description: 'Withdrawal to 0x0d6df47d3ae23217daaf453b709e22dbd4b2c001',
-          alertId: 'AE-TORNADO-WITHDRAW',
+          description: 'Withdrawal of 10 ETH to 0x0d6df47d3ae23217daaf453b709e22dbd4b2c001',
+          alertId: 'AE-TORNADO-WITHDRAWAL',
           protocol: 'ethereum',
           severity: FindingSeverity.Medium,
           type: FindingType.Suspicious,
           metadata: {
             to: '0x0d6df47d3ae23217daaf453b709e22dbd4b2c001',
-            hash: logs[0].transactionHash,
-            amount: '10 ETH',
+            amount: '10',
           },
           everestId: '0x55d07cab60a86966a01680e2242c4af4080a5566',
         }),
