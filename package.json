@@ -1,7 +1,7 @@
 {
   "name": "forta-tornado-cash",
-  "version": "0.0.2",
-  "description": "Forta Agents to monitor tornado.cash",
+  "version": "0.0.3",
+  "description": "Forta agents to monitor tornado.cash",
   "scripts": {
     "start": "npm run start:dev",
     "start:dev": "nodemon --watch src --watch forta.config.json -e js,json --exec 'forta-agent run'",
@@ -15,13 +15,14 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.1",
-    "forta-agent": "^0.0.11"
+    "ethers": "^5.4.7",
+    "forta-agent": "^0.0.23"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.24.2",
-    "jest": "^27.0.6",
-    "nodemon": "^2.0.8"
+    "eslint-plugin-import": "^2.25.2",
+    "jest": "^27.3.1",
+    "nodemon": "^2.0.14"
   }
 }
